@@ -8,6 +8,7 @@
 
 .App {
   min-height: 100vh;
+  /* height: fit-content; */
   position: relative;
   background-color: #313131;
 }

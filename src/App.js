@@ -8,7 +8,7 @@ import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
 function App() {
-  let environment = "production"
+  let environment = "development"
   if (environment !== "development") {
     if (window.location.protocol !== 'https:') {
       window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`)
@@ -34,8 +34,8 @@ function App() {
   const [submitting, setSubmitting] = useState(false);
 
   const getVideoStream = async () => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const w = window.screen.width;
+    const h = window.screen.height;
      await navigator.mediaDevices
       .getUserMedia(
         { 
@@ -61,8 +61,8 @@ function App() {
   }
 
   const takePhoto = () => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const w = window.screen.width;
+    const h = window.screen.height;
 
     let video = videoRef.current;
     let photo = photoRef.current;
@@ -82,8 +82,8 @@ function App() {
   }
 
   const handleCloseSnapPhoto = () => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const w = window.screen.width;
+    const h = window.screen.height;
 
     var resultDiv = document.querySelector('.result')
     resultDiv.style.display = 'none';
@@ -274,8 +274,8 @@ function App() {
 
   async function startRecording()
   {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const w = window.screen.width;
+    const h = window.screen.height;
 
     fpPromise
       .then((fp) => fp.get({ extendedResult: true }))
@@ -338,8 +338,8 @@ function App() {
       var recordedVideo = document.querySelector('video#recording');
       recordedVideo.src = URL.createObjectURL(new Blob(blobs, { type: mediaRecorder.mimeType }));
 
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = window.screen.width;
+      const h = window.screen.height;
 
       var takeVideoDiv = document.querySelector('#recordingBtn');
       takeVideoDiv.style.display = 'none';
