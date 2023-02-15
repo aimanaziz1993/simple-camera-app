@@ -8,7 +8,7 @@ import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
 function App() {
-  let environment = "development"
+  let environment = "production"
   if (environment !== "development") {
     if (window.location.protocol !== 'https:') {
       window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`)
