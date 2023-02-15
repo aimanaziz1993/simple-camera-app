@@ -8,7 +8,7 @@ import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
 function App() {
-  let environment = "development"
+  let environment = "production"
   if (environment !== "development") {
     if (window.location.protocol !== 'https:') {
       window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`)
@@ -30,6 +30,8 @@ function App() {
 
   const [hasPhoto, setHasPhoto] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const getVideoStream = async () => {
     const w = window.innerWidth;
@@ -384,7 +386,6 @@ function App() {
   }
 
   const handleFileUpload = async (file, callback) => {
-    console.log(file);
 
     info.fingerprint = JSON.parse(window.localStorage.getItem("fingerprint"));
 
@@ -395,8 +396,6 @@ function App() {
     for (const key of Object.keys(uploadArray)) {
       body.append("files[]", uploadArray[key]);
     }
-    console.log(info)
-
     body.append("details", JSON.stringify(info));
 
     let url = "";
@@ -427,27 +426,39 @@ function App() {
                   callback('upload-ended');
                   return;
               }
-              alert(request.responseText);
+              if (request.status === 200) {
+                alert("Evidence successfully submitted");
+              } else {
+                alert("Evidence uploading failed");
+                window.location.reload();
+              }
+              // alert(request.responseText);
               return;
           }
       };
       request.upload.onloadstart = function() {
+          setSubmitting(true);
           callback('PHP upload started...');
       };
       request.upload.onprogress = function(event) {
+        setSubmitting(true);
           callback('PHP upload Progress ' + Math.round(event.loaded / event.total * 100) + "%");
       };
       request.upload.onload = function() {
+        setSubmitting(true);
           callback('progress-about-to-end');
       };
       request.upload.onload = function() {
           callback('PHP upload ended. Getting file URL.');
+          setSubmitting(false);
       };
       request.upload.onerror = function(error) {
-          callback('PHP upload failed.');
+        setSubmitting(false)
+        callback('PHP upload failed.');
       };
       request.upload.onabort = function(error) {
-          callback('PHP upload aborted.');
+        setSubmitting(false)
+        callback('PHP upload aborted.');
       };
       request.open('POST', url);
       request.send(data);
@@ -499,7 +510,11 @@ function App() {
           <CloseOutlinedIcon />
         </button>
         <button id="saveVideo" className="save">
-          <CloudUploadOutlinedIcon />
+          { submitting ? 'Submission in progress..' : (
+            <>
+              <CloudUploadOutlinedIcon />
+            </>
+          ) }
         </button>
         {/* <button className="download">
           <DownloadOutlinedIcon />
