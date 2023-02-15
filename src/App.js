@@ -3,8 +3,15 @@ import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 
 function App() {
+  let environment = "development"
+  if (environment !== "development") {
+    if (window.location.protocol !== 'https:') {
+      window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`)
+    }
+  }
 
   let blobs = [];
   let stream;
@@ -19,18 +26,14 @@ function App() {
   const [hasPhoto, setHasPhoto] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
 
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-
-  const getVideoStream = () => {
-    navigator.mediaDevices
+  const getVideoStream = async () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+     await navigator.mediaDevices
       .getUserMedia(
         { 
           audio: false, 
-          video: { width: w, height: h },
-          facingMode: {
-            exact: 'environment'
-          }
+          video: { width: w, height: h, facingMode: "environment" },
         })
       .then(stream => {
         let video = videoRef.current;
@@ -72,6 +75,9 @@ function App() {
   }
 
   const handleCloseSnapPhoto = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
     var resultDiv = document.querySelector('.result')
     resultDiv.style.display = 'none';
     resultDiv.style.zIndex = '-1';
@@ -82,10 +88,8 @@ function App() {
     let photo = photoRef.current;
 
     let ctx = photo.getContext('2d');
-    ctx.clearRect(0, 0, photo.width, photo.height);
+    ctx.clearRect(0, 0, w, h);
     setHasPhoto(false)
-
-    getVideoStream();
   }
 
   const handleCloseRecordingPreview = () => {
@@ -100,7 +104,6 @@ function App() {
     var recordedVideo = document.querySelector('video#recording');
     recordedVideo.src = null;
     setRecording(false);
-    getVideoStream();
     document.querySelector('#log').innerHTML = "";
     document.querySelector('#recordedTime').innerHTML = "";
   }
@@ -264,7 +267,10 @@ function App() {
 
   async function startRecording()
   {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { width: w, height: h, facingMode: "environment" } });
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (event) => {
       // Let's append blobs for now, we could also upload them to the network.
@@ -287,7 +293,7 @@ function App() {
         setTimeout(looper, 1000);
         count++
 
-        if (count === 30) {
+        if (count === 61) {
           wait(0).then(
             () => mediaRecorder.state === "recording" && mediaRecorder.stop()
           );
@@ -302,6 +308,9 @@ function App() {
   function endRecording()
   {
       // Let's stop capture and recording
+      if(mediaRecorder.state === "inactive") {
+          return;
+      }
       mediaRecorder.stop();
       stream.getTracks().forEach(track => track.stop());
       setHasRecorded(true);
@@ -310,33 +319,56 @@ function App() {
 
   function doPreview()
   {
-      // alert(blobs)
-      console.log(blobs)
       if (!blobs.length)
           return;
       // Let's concatenate blobs to preview the recorded content
       var recordedVideo = document.querySelector('video#recording');
       recordedVideo.src = URL.createObjectURL(new Blob(blobs, { type: mediaRecorder.mimeType }));
 
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
       var takeVideoDiv = document.querySelector('#recordingBtn');
-        takeVideoDiv.style.display = 'none';
-        document.querySelector('#stopBtn').style.display = "none";
+      takeVideoDiv.style.display = 'none';
+      document.querySelector('#stopBtn').style.display = "none";
 
-        var recordDiv = document.querySelector('.recorded');
-        recordedVideo.controls = true;
-        // recordedVideo.controls = true;
-        // recordedVideo.loop = true;
-        // recordedVideo.muted = true;
-        // recordedVideo.playsInline = true;
-        // recordedVideo.controlsList = "nofullscreen";
-        // recordedVideo.width = w;
-        // recordedVideo.height = h;
-        // recordedVideo.play();
+      var recordDiv = document.querySelector('.recorded');
+      recordedVideo.controls = true;
+      recordedVideo.controlsList = "nofullscreen";
+      recordedVideo.width = w;
+      recordedVideo.height = h;
 
-        log("Recorded: " + formatBytes(blobs[0].size));
+      log("Recorded: " + formatBytes(blobs[0].size));
 
-        recordDiv.style.display = 'block';
-        recordDiv.style.zIndex = '2';
+      recordDiv.style.display = 'block';
+      recordDiv.style.zIndex = '2';
+
+      const downloadButton = document.querySelector('button.download');
+      downloadButton.addEventListener('click', () => {
+        const blob = new Blob(blobs, {type: 'video/mp4'});
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'test.mp4';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      });
+
+      const uploadButton = document.querySelector('button#saveVideo');
+      var videoRecording = document.querySelector('#recording');
+
+      console.log(typeof videoRecording.src)
+      uploadButton.addEventListener('click', () => {
+        const blob = new Blob(blobs, {type: 'video/mp4'});
+        var testFile = new File([blob], 'filename.mp4', { type: "video/mp4" })
+        console.log( testFile);
+        alert(`You have successfully uploaded an evidence => ${formatBytes(testFile.size)}`)
+      })
   }
 
   function supportsRecording(mimeType)
@@ -384,8 +416,11 @@ function App() {
         <button onClick={handleCloseRecordingPreview}>
           <CloseOutlinedIcon />
         </button>
-        <button className="save">
+        <button id="saveVideo" className="save">
           <CloudUploadOutlinedIcon />
+        </button>
+        <button className="download">
+          <DownloadOutlinedIcon />
         </button>
       </div>
     </div>

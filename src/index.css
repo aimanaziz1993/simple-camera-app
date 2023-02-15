@@ -82,6 +82,10 @@ video#recording {
   margin-left: 65px;
 }
 
+.recorded > button.download {
+  margin-left: 100px;
+}
+
 .recorded > button {
   position: absolute;
   top: 20px;
