@@ -3,7 +3,9 @@ import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+// import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+
+import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
 function App() {
   let environment = "development"
@@ -13,6 +15,9 @@ function App() {
     }
   }
 
+  const fpPromise = FingerprintJS.load({ apiKey: "GzuVdUvjogngbi8Qrgrp" });
+
+  let info = {};
   let blobs = [];
   let stream;
   let mediaRecorder;
@@ -270,6 +275,12 @@ function App() {
     const w = window.innerWidth;
     const h = window.innerHeight;
 
+    fpPromise
+      .then((fp) => fp.get({ extendedResult: true }))
+      .then((result) => {
+        window.localStorage.setItem("fingerprint", JSON.stringify(result));
+    });
+
     stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { width: w, height: h, facingMode: "environment" } });
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (event) => {
@@ -343,21 +354,21 @@ function App() {
       recordDiv.style.display = 'block';
       recordDiv.style.zIndex = '2';
 
-      const downloadButton = document.querySelector('button.download');
-      downloadButton.addEventListener('click', () => {
-        const blob = new Blob(blobs, {type: 'video/mp4'});
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'test.mp4';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        }, 100);
-      });
+      // const downloadButton = document.querySelector('button.download');
+      // downloadButton.addEventListener('click', () => {
+      //   const blob = new Blob(blobs, {type: 'video/mp4'});
+      //   const url = window.URL.createObjectURL(blob);
+      //   const a = document.createElement('a');
+      //   a.style.display = 'none';
+      //   a.href = url;
+      //   a.download = 'test.mp4';
+      //   document.body.appendChild(a);
+      //   a.click();
+      //   setTimeout(() => {
+      //     document.body.removeChild(a);
+      //     window.URL.revokeObjectURL(url);
+      //   }, 100);
+      // });
 
       const uploadButton = document.querySelector('button#saveVideo');
       var videoRecording = document.querySelector('#recording');
@@ -365,10 +376,81 @@ function App() {
       console.log(typeof videoRecording.src)
       uploadButton.addEventListener('click', () => {
         const blob = new Blob(blobs, {type: 'video/mp4'});
-        var testFile = new File([blob], 'filename.mp4', { type: "video/mp4" })
-        console.log( testFile);
-        alert(`You have successfully uploaded an evidence => ${formatBytes(testFile.size)}`)
+        var fileObj = new File([blob], 'filename.mp4', { type: "video/mp4" });
+        handleFileUpload(fileObj, function(response) {
+          console.log(response);
+        });
       })
+  }
+
+  const handleFileUpload = async (file, callback) => {
+    console.log(file);
+
+    info.fingerprint = JSON.parse(window.localStorage.getItem("fingerprint"));
+
+    let uploadArray = [];
+    uploadArray.push(file);
+
+    const body = new FormData();
+    for (const key of Object.keys(uploadArray)) {
+      body.append("files[]", uploadArray[key]);
+    }
+    console.log(info)
+
+    body.append("details", JSON.stringify(info));
+
+    let url = "";
+
+    if (environment === "development") {
+      url = info.hash
+        ? `http://127.0.0.1:8000/api/users?u_=${info.hash}`
+        : `http://127.0.0.1:8000/api/users`;
+    } else if (environment === "production") {
+      url = info.hash
+        ? `https://findwitness.sg/api/users?u_=${info.hash}`
+        : `https://findwitness.sg/api/users`;
+    }
+
+    makeXMLHttpRequest(url, body, function(progress) {
+        if (progress !== 'upload-ended') {
+            callback(progress);
+            return;
+        }
+    });
+  }
+
+  function makeXMLHttpRequest(url, data, callback) {
+    var request = new XMLHttpRequest();
+      request.onreadystatechange = function() {
+          if (request.readyState === 4 && request.status === 200) {
+              if (request.responseText === 'success') {
+                  callback('upload-ended');
+                  return;
+              }
+              alert(request.responseText);
+              return;
+          }
+      };
+      request.upload.onloadstart = function() {
+          callback('PHP upload started...');
+      };
+      request.upload.onprogress = function(event) {
+          callback('PHP upload Progress ' + Math.round(event.loaded / event.total * 100) + "%");
+      };
+      request.upload.onload = function() {
+          callback('progress-about-to-end');
+      };
+      request.upload.onload = function() {
+          callback('PHP upload ended. Getting file URL.');
+      };
+      request.upload.onerror = function(error) {
+          callback('PHP upload failed.');
+      };
+      request.upload.onabort = function(error) {
+          callback('PHP upload aborted.');
+      };
+      request.open('POST', url);
+      request.send(data);
   }
 
   function supportsRecording(mimeType)
@@ -419,9 +501,9 @@ function App() {
         <button id="saveVideo" className="save">
           <CloudUploadOutlinedIcon />
         </button>
-        <button className="download">
+        {/* <button className="download">
           <DownloadOutlinedIcon />
-        </button>
+        </button> */}
       </div>
     </div>
   );
