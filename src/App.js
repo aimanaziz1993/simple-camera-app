@@ -43,7 +43,7 @@ function App() {
       .getUserMedia(
         { 
           audio: false, 
-          video: { width: w, height: h, facingMode: "environment" },
+          video: { facingMode: "environment" },
         })
       .then(stream => {
         let video = videoRef.current;
@@ -167,7 +167,7 @@ function App() {
         window.localStorage.setItem("fingerprint", JSON.stringify(result));
     });
 
-    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { width: w, height: h, facingMode: "environment" } });
+    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "environment" } });
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (event) => {
       // Let's append blobs for now, we could also upload them to the network.
@@ -335,6 +335,7 @@ function App() {
         callback('PHP upload ended. Getting file URL.');
         setTimeout(() => {
           setSubmitting(false);
+          setProgress(0)
         }, 2000)
       };
       request.upload.onerror = function(error) {
