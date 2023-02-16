@@ -5,10 +5,12 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 // import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 
+import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
 function App() {
-  let environment = "production"
+  const environment = process.env.REACT_APP_ENV || "development";
+
   if (environment !== "development") {
     if (window.location.protocol !== 'https:') {
       window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`)
@@ -32,6 +34,7 @@ function App() {
   const [hasRecorded, setHasRecorded] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const getVideoStream = async () => {
     const w = window.screen.width;
@@ -60,26 +63,26 @@ function App() {
       })
   }
 
-  const takePhoto = () => {
-    const w = window.screen.width;
-    const h = window.screen.height;
+  // const takePhoto = () => {
+  //   const w = window.screen.width;
+  //   const h = window.screen.height;
 
-    let video = videoRef.current;
-    let photo = photoRef.current;
+  //   let video = videoRef.current;
+  //   let photo = photoRef.current;
 
-    photo.width = w;
-    photo.height = h;
+  //   photo.width = w;
+  //   photo.height = h;
 
-    let ctx = photo.getContext('2d');
-    ctx.drawImage(video, 0, 0, w, h);
-    setHasPhoto(true)
+  //   let ctx = photo.getContext('2d');
+  //   ctx.drawImage(video, 0, 0, w, h);
+  //   setHasPhoto(true)
 
-    var resultDiv = document.querySelector('.result')
-    resultDiv.style.display = 'block';
-    resultDiv.style.zIndex = '2';
-    var takeVideoDiv = document.querySelector('#recordingBtn');
-    takeVideoDiv.style.display = 'none';
-  }
+  //   var resultDiv = document.querySelector('.result')
+  //   resultDiv.style.display = 'block';
+  //   resultDiv.style.zIndex = '2';
+  //   var takeVideoDiv = document.querySelector('#recordingBtn');
+  //   takeVideoDiv.style.display = 'none';
+  // }
 
   const handleCloseSnapPhoto = () => {
     const w = window.screen.width;
@@ -114,125 +117,6 @@ function App() {
     document.querySelector('#log').innerHTML = "";
     document.querySelector('#recordedTime').innerHTML = "";
   }
-
-  // const startRecording = async () => {
-  //   let data = []; // blob
-  //   let recorder, dateStarted;
-
-  //   if (stream) {
-
-  //     const options = {
-  //       mimeType: 'video/webm'
-  //     }
-  //     try {
-  //       recorder = new MediaRecorder(stream, options);
-  //     } catch (err) {
-  //       try {
-  //         recorder = new MediaRecorder(stream, { mimeType: "video/mp4" });
-  //       } catch (error) {
-  //         alert(error)
-  //       }
-  //     }
-  //   }
-
-  //   recorder.ondataavailable = (event) => {
-  //     // alert(event.data.size)
-  //     if (event.data && event.data.size > 0) {
-  //       data.push(event.data);
-  //     }
-  //   }
-  //   recorder.start();
-  //   setRecording(true);
-
-  //   dateStarted = new Date().getTime();
-
-  //   let stopped = new Promise((resolve, reject) => {
-  //     recorder.onstop = resolve;
-  //     recorder.onerror = event => reject(event.name);
-  //   });
-
-  //   document.querySelector('#stopBtn').addEventListener('click', function() {
-  //     wait(0).then(
-  //       () => recorder.state === "recording" && recorder.stop()
-  //     )
-  //   })
-
-  //   let recorded;
-    
-  //   let count = 0;
-  //   (function looper() {
-        
-  //       if(recorder.state === "inactive") {
-  //           return;
-  //       }
-  //       document.querySelector('#stopBtn').style.display = "block";
-  //       document.querySelector('#recordedTime').innerHTML = calculateTimeDuration((new Date().getTime() - dateStarted) / 1000);
-  //       setTimeout(looper, 1000);
-  //       count++
-
-  //       if (count === recordingTimeMS) {
-  //         recorded = wait(0).then(
-  //           () => recorder.state === "recording" && recorder.stop()
-  //         );
-  //       }
-  //   })();
-
-  //   return Promise.all([
-  //     stopped,
-  //     recorded
-  //   ])
-  //   .then(() => {
-  //     console.log(data)
-  //     if (data[0].size > 0) {
-  //       alert(data[0].size)
-  //       setHasRecorded(true);
-  //       setRecording(false);
-
-  //       let type = "video/webm";
-  //       if (iphone) {
-  //         type = "video/mp4";
-  //       }
-
-  //       let recordedBlob = new Blob(data, {
-  //         type: type
-  //       });
-
-  //       var takeVideoDiv = document.querySelector('#recordingBtn');
-  //       takeVideoDiv.style.display = 'none';
-  //       document.querySelector('#stopBtn').style.display = "none";
-
-  //       var recordDiv = document.querySelector('.recorded');
-  //       var recordedVideo = document.querySelector('video#recording');
-  //       // recordedVideo.src = window.URL.createObjectURL(recordedBlob);
-
-  //       recordedVideo.src = null;
-  //       recordedVideo.srcObject = null;
-  //       recordedVideo.src = window.URL.createObjectURL(recordedBlob);
-  //       recordedVideo.controls = true;
-  //       // recordedVideo.controls = true;
-  //       // recordedVideo.loop = true;
-  //       // recordedVideo.muted = true;
-  //       // recordedVideo.playsInline = true;
-  //       // recordedVideo.controlsList = "nofullscreen";
-  //       // recordedVideo.width = w;
-  //       // recordedVideo.height = h;
-  //       // recordedVideo.play();
-
-  //       log("Recorded: " + formatBytes(recordedBlob.size));
-
-  //       recordDiv.style.display = 'block';
-  //       recordDiv.style.zIndex = '2';
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     alert(err)
-  //   })
-  // }
-
-  useEffect(() => {
-    getVideoStream();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   function log(msg) {
     let logElement = document.getElementById("log");
@@ -373,9 +257,7 @@ function App() {
       // });
 
       const uploadButton = document.querySelector('button#saveVideo');
-      var videoRecording = document.querySelector('#recording');
 
-      console.log(typeof videoRecording.src)
       uploadButton.addEventListener('click', () => {
         const blob = new Blob(blobs, {type: 'video/mp4'});
         var fileObj = new File([blob], 'filename.mp4', { type: "video/mp4" });
@@ -411,6 +293,7 @@ function App() {
     }
 
     makeXMLHttpRequest(url, body, function(progress) {
+        console.log('progress', progress)
         if (progress !== 'upload-ended') {
             callback(progress);
             return;
@@ -427,12 +310,11 @@ function App() {
                   return;
               }
               if (request.status === 200) {
-                alert("Evidence successfully submitted");
+                console.log("Evidence successfully submitted");
               } else {
-                alert("Evidence uploading failed");
+                console.log("Evidence uploading failed");
                 window.location.reload();
               }
-              // alert(request.responseText);
               return;
           }
       };
@@ -442,15 +324,18 @@ function App() {
       };
       request.upload.onprogress = function(event) {
         setSubmitting(true);
-          callback('PHP upload Progress ' + Math.round(event.loaded / event.total * 100) + "%");
+        setProgress(event.loaded / event.total * 100)
+        callback('PHP upload Progress ' + Math.round(event.loaded / event.total * 100) + "%");
       };
       request.upload.onload = function() {
         setSubmitting(true);
-          callback('progress-about-to-end');
+        callback('progress-about-to-end');
       };
       request.upload.onload = function() {
-          callback('PHP upload ended. Getting file URL.');
+        callback('PHP upload ended. Getting file URL.');
+        setTimeout(() => {
           setSubmitting(false);
+        }, 2000)
       };
       request.upload.onerror = function(error) {
         setSubmitting(false)
@@ -464,17 +349,22 @@ function App() {
       request.send(data);
   }
 
-  function supportsRecording(mimeType)
-  {
-      if (!window.MediaRecorder)
-          return false;
-      if (!MediaRecorder.isTypeSupported)
-          return mimeType.startsWith("audio/mp4") || mimeType.startsWith("video/mp4");
-      return MediaRecorder.isTypeSupported(mimeType);
-  }
+  useEffect(() => {
+    getVideoStream();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="App">
+      
+      { submitting ? (
+        <>
+          <div className="progress">
+            <LinearProgressWithLabel value={progress} />
+          </div>
+        </>
+      ) : (<></>) }
+
       <div className="top">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
         <button id="stopBtn">
@@ -486,9 +376,6 @@ function App() {
       </div>
       <div className="camera">
         <video ref={videoRef} playsInline autoPlay muted></video>
-        <button className="cameraBtn" onClick={takePhoto}>
-          <CameraAltOutlinedIcon />
-        </button>
         <div id="recordingBtn" className="recordingBtn">
           <button className={ `record ${recording ? 'recording' : ''}` } onClick={startRecording} disabled={recording}></button>
         </div>
@@ -506,6 +393,7 @@ function App() {
 
       <div className={ `recorded ${hasRecorded ? 'hasRecorded' : ''}` }>
         <video id="recording" autoPlay playsInline muted loop></video>
+
         <button onClick={handleCloseRecordingPreview}>
           <CloseOutlinedIcon />
         </button>
@@ -516,9 +404,6 @@ function App() {
             </>
           ) }
         </button>
-        {/* <button className="download">
-          <DownloadOutlinedIcon />
-        </button> */}
       </div>
     </div>
   );

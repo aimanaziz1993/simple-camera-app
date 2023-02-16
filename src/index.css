@@ -59,7 +59,7 @@ video {
   /* height: 100vh; */
   /* min-height: 100%; */
   max-height: 100vh;
-  object-fit: cover;
+  object-fit: fill;
 }
 
 .recorded {
@@ -100,11 +100,13 @@ video#recording {
   outline: none;
   padding: 8px 16px;
   background-position: 0%;
-  background-image: linear-gradient(to right, #844FFF 100%, #FF4F84 50%);
+  background-image: linear-gradient(to right, #AA093C 100%, #FF4F84 50%);
   color: #fff;
-  font-weight: 700;
+  font-weight: 500;
+  font-size: small;
   transition: 0.4s;
   cursor: pointer;
+  border-radius: 50px;
 }
 
 .result > button {
@@ -141,10 +143,6 @@ video#recording {
   animation: blinker 1.5s linear infinite;
 }
 
-/* button.hasRecorded {
-  background: transparent;
-} */
-
 .top {
   position: fixed;
   color: #fff;
@@ -170,4 +168,10 @@ video#recording {
   50% {
     opacity: 0;
   }
+}
+
+.progress {
+  position: relative;
+  z-index: 100;
+  background: none;
 }
