@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
+// import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
+// import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 // import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import StopRoundedIcon from '@mui/icons-material/StopRounded';
+
+import ModalSuccess from "./components/ModalSuccess";
 
 import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
@@ -35,6 +38,8 @@ function App() {
 
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const [openSuccessModal, setOpenSuccessModal] = useState(false);
 
   const getVideoStream = async () => {
     const w = window.screen.width;
@@ -116,6 +121,8 @@ function App() {
     setRecording(false);
     document.querySelector('#log').innerHTML = "";
     document.querySelector('#recordedTime').innerHTML = "";
+
+    setOpenSuccessModal(false)
   }
 
   function log(msg) {
@@ -256,16 +263,19 @@ function App() {
       //   }, 100);
       // });
 
-      const uploadButton = document.querySelector('button#saveVideo');
+      // const uploadButton = document.querySelector('button#saveVideo');
 
-      uploadButton.addEventListener('click', () => {
+      // uploadButton.addEventListener('click', () => {
         const blob = new Blob(blobs, {type: 'video/mp4'});
         var fileObj = new File([blob], 'filename.mp4', { type: "video/mp4" });
         handleFileUpload(fileObj, function(response) {
           console.log(response);
+          document.querySelector('button#saveVideo').style.display = 'none';
         });
-      })
+      // })
   }
+
+  // const handleCloseModal = ()
 
   const handleFileUpload = async (file, callback) => {
 
@@ -298,6 +308,7 @@ function App() {
             callback(progress);
             return;
         }
+        
     });
   }
 
@@ -311,6 +322,10 @@ function App() {
               }
               if (request.status === 200) {
                 console.log("Evidence successfully submitted");
+
+                setTimeout(() => {
+                  setOpenSuccessModal(true)
+                }, 1000)
               } else {
                 console.log("Evidence uploading failed");
                 window.location.reload();
@@ -357,7 +372,13 @@ function App() {
 
   return (
     <div className="App">
-      
+
+      {openSuccessModal ? (<>
+        <div className="modal">
+          <ModalSuccess props={openSuccessModal} />
+        </div>
+      </>) : ("")}
+
       { submitting ? (
         <>
           <div className="progress">
@@ -368,9 +389,9 @@ function App() {
 
       <div className="top">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
-        <button id="stopBtn">
+        {/* <button id="stopBtn">
           <StopCircleOutlinedIcon />
-        </button>
+        </button> */}
         <span id="recordedTime"></span>
         </div>
         <pre id="log"></pre>
@@ -378,6 +399,10 @@ function App() {
       <div className="camera">
         <video ref={videoRef} playsInline autoPlay muted></video>
         <div id="recordingBtn" className="recordingBtn">
+          <button id="stopBtn"
+          >
+            <StopRoundedIcon fontSize="large" style={{color:"white"}} />
+          </button>
           <button className={ `record ${recording ? 'recording' : ''}` } onClick={startRecording} disabled={recording}></button>
         </div>
       </div>
