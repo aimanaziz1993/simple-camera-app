@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-// import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-// import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
-// import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import StopRoundedIcon from '@mui/icons-material/StopRounded';
 
-import ModalSuccess from "./components/ModalSuccess";
-
+import SuccessPage from "./components/SuccessPage";
+import SecurePage from "./components/SecurePage";
 import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
+import Hint from "./components/Hint";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
 function App() {
@@ -30,16 +28,18 @@ function App() {
   const videoRef = useRef(null);
   const photoRef = useRef(null);
 
-  // const [stream, setStream] = useState(null);
   const [recording, setRecording] = useState(false);
 
   const [hasPhoto, setHasPhoto] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
+  const [preview, setPreview] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const [openSuccessModal, setOpenSuccessModal] = useState(false);
+  const [openSecureModal, setOpenSecureModal] = useState(false);
+  const [responseData, setResponseData] = useState(null);
 
   const getVideoStream = async () => {
     const w = window.screen.width;
@@ -119,8 +119,11 @@ function App() {
     var recordedVideo = document.querySelector('video#recording');
     recordedVideo.src = null;
     setRecording(false);
+    setPreview(false);
     document.querySelector('#log').innerHTML = "";
     document.querySelector('#recordedTime').innerHTML = "";
+    document.querySelector('#text').innerHTML = "";
+    document.querySelector('#recordedBlobSize').innerHTML = "";
 
     setOpenSuccessModal(false)
   }
@@ -165,20 +168,24 @@ function App() {
 
   async function startRecording()
   {
-    const w = window.screen.width;
-    const h = window.screen.height;
-
     fpPromise
       .then((fp) => fp.get({ extendedResult: true }))
       .then((result) => {
         window.localStorage.setItem("fingerprint", JSON.stringify(result));
     });
 
+    blobs = [];
+    const MAX_BLOB_SIZES = 7000000; // 9900000 = 9.9MB, 10000000 = 10MB, 9999999 == 9.999 MB, 7000000 = 7MB
     stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "environment" } });
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (event) => {
       // Let's append blobs for now, we could also upload them to the network.
-      if (event.data) blobs.push(event.data);
+      if (event.data && event.data.size > 0) {
+        blobs.push(event.data)
+      };
+      // get Blobs for new compiled sizes
+      const newSizesBlob = new Blob(blobs, { type: "video/mp4" });
+      document.querySelector('#recordedBlobSize').innerHTML = "|" + formatBytes(newSizesBlob.size);
     }
     mediaRecorder.onstop = doPreview;
 
@@ -188,16 +195,20 @@ function App() {
     let dateStarted = new Date().getTime();
     let count = 0;
     (function looper() {
+
+        const checkSizes = new Blob(blobs, { type: "video/mp4" });
         
         if(mediaRecorder.state === "inactive") {
             return;
         }
         document.querySelector('#stopBtn').style.display = "block";
+        document.querySelector('#text').innerHTML = "Evidence recording in progress...";
         document.querySelector('#recordedTime').innerHTML = calculateTimeDuration((new Date().getTime() - dateStarted) / 1000);
         setTimeout(looper, 1000);
         count++
+        mediaRecorder.requestData();
 
-        if (count === 61) {
+        if (count === 61 || checkSizes.size >= MAX_BLOB_SIZES) {
           wait(0).then(
             () => mediaRecorder.state === "recording" && mediaRecorder.stop()
           );
@@ -223,56 +234,42 @@ function App() {
 
   function doPreview()
   {
-      if (!blobs.length)
-          return;
-      // Let's concatenate blobs to preview the recorded content
-      var recordedVideo = document.querySelector('video#recording');
-      recordedVideo.src = URL.createObjectURL(new Blob(blobs, { type: mediaRecorder.mimeType }));
+    setPreview(true)
+    if (!blobs.length)
+        return;
+    // Let's concatenate blobs to preview the recorded content
+    var recordedVideo = document.querySelector('video#recording');
+    var newBlobs = new Blob(blobs, { type: "video/mp4" });
+    // console.log('new compiled blobs', newBlobs)
+    recordedVideo.src = URL.createObjectURL(newBlobs);
 
-      const w = window.screen.width;
-      const h = window.screen.height;
+    const w = window.screen.width;
+    const h = window.screen.height;
 
-      var takeVideoDiv = document.querySelector('#recordingBtn');
-      takeVideoDiv.style.display = 'none';
-      document.querySelector('#stopBtn').style.display = "none";
+    var takeVideoDiv = document.querySelector('#recordingBtn');
+    takeVideoDiv.style.display = 'none';
+    document.querySelector('#stopBtn').style.display = "none";
+    document.querySelector('#text').innerHTML = "";
 
-      var recordDiv = document.querySelector('.recorded');
-      recordedVideo.controls = true;
-      recordedVideo.controlsList = "nofullscreen";
-      recordedVideo.width = w;
-      recordedVideo.height = h;
+    var recordDiv = document.querySelector('.recorded');
+    recordedVideo.controls = true;
+    recordedVideo.controlsList = "nofullscreen";
+    recordedVideo.width = w;
+    recordedVideo.height = h;
 
-      log("Recorded: " + formatBytes(blobs[0].size));
+    log("Recorded: " + formatBytes(newBlobs.size));
 
-      recordDiv.style.display = 'block';
-      recordDiv.style.zIndex = '2';
+    recordDiv.style.display = 'block';
+    recordDiv.style.zIndex = '2';
 
-      // const downloadButton = document.querySelector('button.download');
-      // downloadButton.addEventListener('click', () => {
-      //   const blob = new Blob(blobs, {type: 'video/mp4'});
-      //   const url = window.URL.createObjectURL(blob);
-      //   const a = document.createElement('a');
-      //   a.style.display = 'none';
-      //   a.href = url;
-      //   a.download = 'test.mp4';
-      //   document.body.appendChild(a);
-      //   a.click();
-      //   setTimeout(() => {
-      //     document.body.removeChild(a);
-      //     window.URL.revokeObjectURL(url);
-      //   }, 100);
-      // });
-
-      // const uploadButton = document.querySelector('button#saveVideo');
-
-      // uploadButton.addEventListener('click', () => {
-        const blob = new Blob(blobs, {type: 'video/mp4'});
-        var fileObj = new File([blob], 'filename.mp4', { type: "video/mp4" });
-        handleFileUpload(fileObj, function(response) {
-          console.log(response);
-          document.querySelector('button#saveVideo').style.display = 'none';
-        });
-      // })
+    // const uploadButton = document.querySelector('button#saveVideo');
+    // uploadButton.addEventListener('click', () => {
+      const blob = new Blob(blobs, {type: 'video/mp4'});
+      var fileObj = new File([blob], '_0065sg.mp4', { type: "video/mp4" });
+      handleFileUpload(fileObj, function(response) {
+        document.querySelector('button#saveVideo').style.display = 'none';
+      });
+    // })
   }
 
   // const handleCloseModal = ()
@@ -280,6 +277,7 @@ function App() {
   const handleFileUpload = async (file, callback) => {
 
     info.fingerprint = JSON.parse(window.localStorage.getItem("fingerprint"));
+    // info.fingerprint.visitorId = null
 
     let uploadArray = [];
     uploadArray.push(file);
@@ -316,6 +314,7 @@ function App() {
     var request = new XMLHttpRequest();
       request.onreadystatechange = function() {
           if (request.readyState === 4 && request.status === 200) {
+              var responseJson = JSON.parse(request.responseText);
               if (request.responseText === 'success') {
                   callback('upload-ended');
                   return;
@@ -323,9 +322,17 @@ function App() {
               if (request.status === 200) {
                 console.log("Evidence successfully submitted");
 
-                setTimeout(() => {
-                  setOpenSuccessModal(true)
-                }, 1000)
+                if (responseJson.data.user?.fingerprint === null) {
+                  setTimeout(() => {
+                    setOpenSecureModal(true)
+                    setResponseData(responseJson.data)
+                  }, 1000)
+                } else {
+                  setTimeout(() => {
+                    setOpenSuccessModal(true)
+                  }, 1000)
+                }
+                
               } else {
                 console.log("Evidence uploading failed");
                 window.location.reload();
@@ -373,10 +380,19 @@ function App() {
   return (
     <div className="App">
 
+      {!preview ? <Hint props={recording} 
+        style={
+          { 
+            display: 'block', 
+          }
+        } /> : ""}
+
       {openSuccessModal ? (<>
-        <div className="modal">
-          <ModalSuccess props={openSuccessModal} />
-        </div>
+        <SuccessPage props={openSuccessModal} close={handleCloseRecordingPreview} />
+      </>) : ("")}
+
+      {openSecureModal ? (<>
+        <SecurePage props={openSecureModal} fpPromise={fpPromise} data={responseData} close={handleCloseRecordingPreview} />
       </>) : ("")}
 
       { submitting ? (
@@ -389,10 +405,9 @@ function App() {
 
       <div className="top">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
-        {/* <button id="stopBtn">
-          <StopCircleOutlinedIcon />
-        </button> */}
-        <span id="recordedTime"></span>
+          <span id="text" className="text dot-animate"></span>
+          <span id="recordedTime"></span>
+          <span id="recordedBlobSize"></span>
         </div>
         <pre id="log"></pre>
       </div>
@@ -419,10 +434,9 @@ function App() {
 
       <div className={ `recorded ${hasRecorded ? 'hasRecorded' : ''}` }>
         <video id="recording" autoPlay playsInline muted loop></video>
-
-        <button onClick={handleCloseRecordingPreview}>
+        {/* <button>
           <CloseOutlinedIcon />
-        </button>
+        </button> */}
         <button id="saveVideo" className="save">
           { submitting ? 'Submission in progress..' : (
             <>
