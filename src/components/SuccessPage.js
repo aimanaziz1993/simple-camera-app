@@ -22,7 +22,7 @@ function SuccessPage({ props, close }) {
         }
 
         if (time >= 3) {
-            // window.location.href = "https://google.com"
+            window.location.href = "https://google.com"
         }
     }, [modalRef, prop, time])
 

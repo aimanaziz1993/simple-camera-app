@@ -146,7 +146,7 @@ function App() {
 
     let count = 3;
     (function countStart() {
-
+      document.querySelector('#text').style.display = "block";
         document.querySelector('#text').innerHTML = count;
         setTimeout(countStart, 1025);
         count--
