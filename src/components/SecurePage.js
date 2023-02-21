@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Player } from "@lottiefiles/react-lottie-player";
 
-import { post } from '../API/Api';
-import { useTimer } from "./Timer";
-
-function SecurePage({ props, fpPromise, data, close }) {
+function SecurePage({ props, fpPromise, close }) {
 
     const environment = process.env.REACT_APP_ENV || "development";
     const modalRef = useRef(null);
@@ -13,10 +9,9 @@ function SecurePage({ props, fpPromise, data, close }) {
     const [postSecured, setPostSecured] = useState(false);
     const [done, setDone] =useState(false);
     let payload = {};
-    const time = useTimer();
 
     const handleSecure = async () => {
-        if (buttonRef.current.innerText === "Secure Now") {
+        if (buttonRef.current.innerText === "Proceed") {
             setSecureLoading(true);
             buttonRef.current.classList.add("opacity-50","cursor-not-allowed");
 
@@ -25,40 +20,15 @@ function SecurePage({ props, fpPromise, data, close }) {
             .then((result) => {
                 if (result.visitorFound) {
                     window.localStorage.setItem("fingerprint", JSON.stringify(result));
-                    payload.fingerprint = result.visitorId
-                    payload.submission_id = data.submission[0].id;
-                    payload.user_id = data.user.id;
 
-                    const body = new FormData();
-                    body.append("details", JSON.stringify(payload));
+                    setTimeout(() => {
+                        setSecureLoading(false);
+                        setPostSecured(true);
 
-                    let url = "";
-
-                    if (environment === "development") {
-                        url = `http://127.0.0.1:8000/api/users/update`;
-                    } else if (environment === "production") {
-                        url = `https://findwitness.sg/api/users/update`;
-                    }
-
-                    post(body, url)
-                    .then((res) => {
-                        console.log(res);
-                        if (res.status === 200) {
-                            // if success run here
-                            setTimeout(() => {
-                                setSecureLoading(false);
-                                setPostSecured(true);
-
-                                setTimeout(() => {
-                                    setDone(true);
-                                }, 1000)
-                            }, 1500)
-                        }
-                    })
-                    .catch((err) => {
-                        setDone(true);
-                        console.log(err);
-                    })
+                        setTimeout(() => {
+                            setDone(true);
+                        }, 1000)
+                    }, 1500)
 
                 } else {
                     setTimeout(() => {
@@ -76,11 +46,13 @@ function SecurePage({ props, fpPromise, data, close }) {
 
     useEffect(() => {
         if (done) {
-            if (buttonRef.current.innerText === "Secured! Redirecting Now.." && !modalRef.current.classList.contains("hidden") && time >= 3) {
-                window.location.href = "https://google.com"
-            }
+            setTimeout(() => {
+                modalRef.current?.classList.add('hidden');
+                buttonRef.current?.classList.add('hidden');
+            }, 500)
+            handleClose();
         }
-    }, [done, time])
+    }, [done])
 
     const Loader = () => {
         return (
@@ -106,111 +78,27 @@ function SecurePage({ props, fpPromise, data, close }) {
     const SuccessLottie = () => {
         return (
             <>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around" }}>
-            {/* <Player
-                src="https://assets4.lottiefiles.com/packages/lf20_3wo4gag4.json"
-                background="transparent"
-                speed="1"
-                style={{ width: "25px", height: "25px" }}
-                keepLastFrame
-                autoplay
-            ></Player> */}
-            Secured! Redirecting Now..
-            </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around" }}>
+                    Started in 3s!
+                </div>
             </>
         )
     }
 
     return (
     <>
-        <main ref={modalRef} className="overflow-x-hidden bg-gray-200 font-sans text-gray-900 antialiased">
-        <div className="relative min-h-screen px-4 md:flex md:items-center md:justify-center">
-            <div className="absolute inset-0 z-10 h-full w-full bg-black opacity-25"></div>
-            <div className="fixed inset-x-0 bottom-20 z-50 mx-4 mb-4 rounded-lg bg-white p-4 md:relative md:mx-auto md:max-w-md">
-            <div className="items-center md:flex">
-                <div className="mx-auto flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
-                <Player
-                    src="https://assets4.lottiefiles.com/packages/lf20_3wo4gag4.json"
-                    background="transparent"
-                    speed="1"
-                    style={{ width: "100%", height: "100%" }}
-                    keepLastFrame
-                    autoplay
-                ></Player>
-                </div>
-                <div className="mt-4 text-center md:mt-0 md:ml-6 md:text-left">
-                <p className="font-bold">Success</p>
-                <p className="mt-1 text-sm text-gray-700">
-                    Thank You for your submission. <br />
-                    Help us to secure your submission by clicking <strong>'Secure Now'</strong> button below.
-                    <br />
-                </p>
-                <p className="mt-1 text-sm text-gray-700">
-                    After submission, please call us within 48 hours to claim your
-                    reward. Thank you.
-                    <br />
-                    <br />
-                </p>
-                </div>
-                <div className="flex items-center justify-center">
-                <div className="inline-flex" role="group">
-                    <button
-                    type="button"
-                    className="
-                            px-6
-                            py-2
-                            border-2 border-b-2 border-blue-600
-                            text-blue-600
-                            font-medium
-                            text-xs
-                            leading-tight
-                            uppercase
-                            hover:bg-black hover:bg-opacity-5
-                            focus:outline-none focus:ring-0
-                            transition
-                            duration-150
-                            ease-in-out
-                        "
-                    >
-                    Call Us at +6568162969
-                    </button>
-                    <button
-                    type="button"
-                    className="
-                        rounded-r
-                        px-6
-                        py-2
-                        bg-blue-600
-                        
-                        text-white
-                        font-medium
-                        text-xs
-                        leading-tight
-                        uppercase
-                        hover:bg-black hover:bg-opacity-5
-                        focus:outline-none focus:ring-0
-                        transition
-                        duration-150
-                        ease-in-out
-                        "
-                    >
-                    COPY
-                    </button>
-                </div>
-                </div>
-            </div>
-            <div className="mt-4 text-center md:flex md:justify-end md:text-right">
-                <button ref={buttonRef} onClick={handleSecure} className="block w-full mb-2 rounded-lg bg-rose-600 px-4 py-3 text-sm font-semibold text-white md:order-2 md:ml-2 md:inline-block md:w-auto md:py-2">
-                    { secureLoading && !postSecured ? <Loader /> : !secureLoading && postSecured ? <SuccessLottie /> : "Secure Now" }
-                </button>
-                {done ? 
-                <button onClick={handleClose} className="block w-full rounded-lg bg-blue-500 px-4 py-3 text-sm font-semibold text-white md:order-2 md:ml-2 md:inline-block md:w-auto md:py-2">
-                    Upload Another
-                </button> : ""}
-            </div>
-            </div>
+        <main ref={modalRef} className="overflow-x-hidden bg-transparent font-sans text-gray-900 antialiased">
+        <div className="relative min-h-screen bg-transparent px-4 md:flex md:items-center md:justify-center">
+            <div className="absolute bg-transparent inset-0 z-0 h-full w-full"></div>
+            
         </div>
         </main>
+
+        <div className="fixed inset-x-0 bottom-80 z-50 mx-4 mb-4 rounded-lg bg-rose p-4 md:relative md:mx-auto md:max-w-md">
+            <button ref={buttonRef} onClick={handleSecure} className="block w-full mb-2 rounded-lg bg-rose-600 px-4 py-3 text-base font-semibold text-white md:order-2 md:ml-2 md:inline-block md:w-auto md:py-2">
+                { secureLoading && !postSecured ? <Loader /> : !secureLoading && postSecured ? <SuccessLottie /> : "Proceed" }
+            </button>
+        </div>
     </>
     );
 }

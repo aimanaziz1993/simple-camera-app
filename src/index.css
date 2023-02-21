@@ -136,7 +136,7 @@ video#recording {
   border-radius: 50%;
   background: transparent;
   position: absolute;
-  bottom: 100px;
+  bottom: 110px;
   left: calc(50% - 30px);
   border: 4px solid #fff;
   cursor: pointer;
@@ -167,7 +167,7 @@ video#recording {
   border-radius: 50%;
   background: transparent;
   position: absolute;
-  bottom: 100px;
+  bottom: 110px;
   left: calc(50% - 30px);
   border: 4px solid #fff;
   cursor: pointer;
@@ -186,26 +186,52 @@ video#recording {
   animation: blinker 1.5s linear infinite;
 }
 
-#text {
-  color: #fff;
-  font-size: smaller;
-  font-weight: 500;
-  /* animation: blinker 2.0s linear infinite; */
+.overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 12;
 }
 
-#text.dot-animate {
-
+#text {
+  color: crimson;
+  font-size: 3rem;
+  font-weight: 700;
+  z-index: 12;
+  /* animation: blinker 2.0s linear infinite; */
+  /* animation: counting .5s 1s; */
+  animation: counting 1.0s linear infinite;
 }
 
 #recordedBlobSize {
   color: crimson;
-  font-size: small;
-  font-weight: 600;
+  font-size: x-large;
+  font-weight: 500;
   /* animation: blinker 2.0s linear infinite; */
 }
 
 @keyframes blinker {
   50% {
+    opacity: 0;
+  }
+}
+
+@keyframes counting {
+  0% {
+    /* transform: scale(1.1); */
+    /* font-size: small; */
+    opacity: 0;
+  }
+  50% {
+    /* transform: scale(.5); */
+    font-size: 40vw;
+    opacity: 0.5;
+  }
+  100% {
+    /* transform: scale(1.1); */
+    font-size: 10vw;
     opacity: 0;
   }
 }

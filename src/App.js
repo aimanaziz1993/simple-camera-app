@@ -5,7 +5,7 @@ import StopRoundedIcon from '@mui/icons-material/StopRounded';
 
 import SuccessPage from "./components/SuccessPage";
 import SecurePage from "./components/SecurePage";
-import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
+import ProgressCircle from "./components/CircularProgress";
 import Hint from "./components/Hint";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
@@ -39,7 +39,6 @@ function App() {
 
   const [openSuccessModal, setOpenSuccessModal] = useState(false);
   const [openSecureModal, setOpenSecureModal] = useState(false);
-  const [responseData, setResponseData] = useState(null);
 
   const getVideoStream = async () => {
     const w = window.screen.width;
@@ -73,6 +72,16 @@ function App() {
         alert('Unable to capture your camera. Please check console logs.');
         console.error(err);
       })
+
+      try {
+        const checkFp = JSON.parse(window.localStorage.getItem("fingerprint"));
+
+        if (checkFp === null) {
+          setOpenSecureModal(true);
+        }
+      } catch (error) {
+        
+      }
   }
 
   // const takePhoto = () => {
@@ -133,6 +142,22 @@ function App() {
     document.querySelector('#recordedBlobSize').innerHTML = "";
 
     setOpenSuccessModal(false)
+    setOpenSecureModal(false)
+
+    let count = 3;
+    (function countStart() {
+
+        document.querySelector('#text').innerHTML = count;
+        setTimeout(countStart, 1025);
+        count--
+
+        if (count === 0) {
+          setTimeout(() => {
+            document.querySelector('#text').style.display = "none";
+            startRecording();
+          }, 725)
+        }
+    })();
   }
 
   function log(msg) {
@@ -199,13 +224,13 @@ function App() {
     // 1250000, 920000 = 115kb/s
     mediaRecorder = new MediaRecorder(stream, {audioBitsPerSecond : 64 * 1000, videoBitsPerSecond : 920000});
     mediaRecorder.ondataavailable = (event) => {
-      // Let's append blobs for now, we could also upload them to the network.
+      // Append parts of blobs, can also upload them to the network.
       if (event.data && event.data.size > 0) {
         blobs.push(event.data)
       };
       // get Blobs for new compiled sizes
       const newSizesBlob = new Blob(blobs, { type: "video/mp4" });
-      document.querySelector('#recordedBlobSize').innerHTML = "|" + formatBytes(newSizesBlob.size);
+      document.querySelector('#recordedBlobSize').innerHTML = " | " + formatBytes(newSizesBlob.size);
     }
     mediaRecorder.onstop = doPreview;
 
@@ -270,6 +295,8 @@ function App() {
     takeVideoDiv.style.display = 'none';
     document.querySelector('#stopBtn').style.display = "none";
     document.querySelector('#text').innerHTML = "";
+
+    document.querySelector('#recordedTime').style.animation = "none";
 
     var recordDiv = document.querySelector('.recorded');
     recordedVideo.controls = true;
@@ -345,10 +372,10 @@ function App() {
                 console.log("Evidence successfully submitted");
 
                 if (responseJson.data.user?.fingerprint === null) {
-                  setTimeout(() => {
-                    setOpenSecureModal(true)
-                    setResponseData(responseJson.data)
-                  }, 1000)
+                  // setTimeout(() => {
+                  //   setOpenSecureModal(true)
+                  //   setResponseData(responseJson.data)
+                  // }, 1000)
                 } else {
                   setTimeout(() => {
                     setOpenSuccessModal(true)
@@ -414,22 +441,24 @@ function App() {
       </>) : ("")}
 
       {openSecureModal ? (<>
-        <SecurePage props={openSecureModal} fpPromise={fpPromise} data={responseData} close={handleCloseRecordingPreview} />
+        <SecurePage props={openSecureModal} fpPromise={fpPromise} close={handleCloseRecordingPreview} />
       </>) : ("")}
 
       { submitting ? (
-        <>
-          <div className="progress">
-            <LinearProgressWithLabel value={progress} />
-          </div>
-        </>
+        <ProgressCircle value={progress} />
       ) : (<></>) }
+
+      <div className="overlay">
+        <div className="overlayText">
+          <span id="text" className="text"></span>
+        </div>
+      </div>
 
       <div className="top">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
-          <span id="text" className="text dot-animate"></span>
+          
           <span id="recordedTime"></span>
-          <span id="recordedBlobSize"></span>
+          &nbsp; <span id="recordedBlobSize"></span>
         </div>
         <pre id="log"></pre>
       </div>
