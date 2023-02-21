@@ -21,7 +21,7 @@ function SuccessPage({ props, close }) {
             }
         }
 
-        if (time >= 10) {
+        if (time >= 3) {
             window.location.href = "https://google.com"
         }
     }, [modalRef, prop, time])
@@ -139,7 +139,7 @@ function SuccessPage({ props, close }) {
                     </div>
                     </div>
                     <div className="mt-4 text-center md:flex md:justify-end md:text-right">
-                    <button onClick={handleClose} className="block w-full rounded-lg bg-blue-500 px-4 py-3 text-sm font-semibold text-white md:order-2 md:ml-2 md:inline-block md:w-auto md:py-2">
+                    <button onClick={handleClose} className="block w-full rounded-lg bg-rose-600 px-4 py-3 text-sm font-semibold text-white md:order-2 md:ml-2 md:inline-block md:w-auto md:py-2">
                         Upload Another
                     </button>
                     </div>

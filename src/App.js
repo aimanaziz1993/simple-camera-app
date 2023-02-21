@@ -47,8 +47,15 @@ function App() {
      await navigator.mediaDevices
       .getUserMedia(
         { 
-          audio: false, 
-          video: { facingMode: "environment" },
+          audio: true, 
+          video: 
+          { 
+            width: 640,
+            height: 480,
+            facingMode: "environment" 
+          },
+          // audioBitsPerSecond: 64 * 1000, // 128 kbit/s
+          // videoBitsPerSecond: 64 * 1000,
         })
       .then(stream => {
         let video = videoRef.current;
@@ -175,9 +182,22 @@ function App() {
     });
 
     blobs = [];
-    const MAX_BLOB_SIZES = 7000000; // 9900000 = 9.9MB, 10000000 = 10MB, 9999999 == 9.999 MB, 7000000 = 7MB
-    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: "environment" } });
-    mediaRecorder = new MediaRecorder(stream);
+    const MAX_BLOB_SIZES = 8000000; // 9900000 = 9.9MB, 10000000 = 10MB, 9999999 == 9.999 MB, 7000000 = 7MB
+    stream = await navigator.mediaDevices.getUserMedia(
+      { 
+        audio: true, 
+        video: 
+          { 
+            width: 640,
+            height: 480,
+            facingMode: "environment" 
+          },
+        // audioBitsPerSecond: 64 * 1000, // 64 kbit/s
+        // videoBitsPerSecond: 64 * 1000, 
+      });
+
+    // 1250000, 920000 = 115kb/s
+    mediaRecorder = new MediaRecorder(stream, {audioBitsPerSecond : 64 * 1000, videoBitsPerSecond : 920000});
     mediaRecorder.ondataavailable = (event) => {
       // Let's append blobs for now, we could also upload them to the network.
       if (event.data && event.data.size > 0) {
@@ -202,13 +222,13 @@ function App() {
             return;
         }
         document.querySelector('#stopBtn').style.display = "block";
-        document.querySelector('#text').innerHTML = "Evidence recording in progress...";
+        document.querySelector('#text').innerHTML = "";
         document.querySelector('#recordedTime').innerHTML = calculateTimeDuration((new Date().getTime() - dateStarted) / 1000);
         setTimeout(looper, 1000);
         count++
         mediaRecorder.requestData();
 
-        if (count === 61 || checkSizes.size >= MAX_BLOB_SIZES) {
+        if (count === 31 || checkSizes.size >= MAX_BLOB_SIZES) {
           wait(0).then(
             () => mediaRecorder.state === "recording" && mediaRecorder.stop()
           );
@@ -265,7 +285,9 @@ function App() {
     // const uploadButton = document.querySelector('button#saveVideo');
     // uploadButton.addEventListener('click', () => {
       const blob = new Blob(blobs, {type: 'video/mp4'});
-      var fileObj = new File([blob], '_0065sg.mp4', { type: "video/mp4" });
+      const generatedUidFilename = Math.random().toString(36).substr(2);
+
+      var fileObj = new File([blob], '_' + generatedUidFilename + '_.mp4', { type: "video/mp4" });
       handleFileUpload(fileObj, function(response) {
         document.querySelector('button#saveVideo').style.display = 'none';
       });

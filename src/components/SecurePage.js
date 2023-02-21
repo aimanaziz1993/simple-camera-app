@@ -76,7 +76,7 @@ function SecurePage({ props, fpPromise, data, close }) {
 
     useEffect(() => {
         if (done) {
-            if (buttonRef.current.innerText === "Secured! Redirecting Now.." && !modalRef.current.classList.contains("hidden") && time >= 30) {
+            if (buttonRef.current.innerText === "Secured! Redirecting Now.." && !modalRef.current.classList.contains("hidden") && time >= 3) {
                 window.location.href = "https://google.com"
             }
         }
