@@ -5,7 +5,7 @@ import { Typography } from '@mui/material';
 function Hint({ props }) {
     const state = props;
     const CaptionOne = () => "";
-    const CaptionTwo = () => "Evidence Recording In Progress...";
+    const CaptionTwo = () => { return (<span>Evidence Recording In Progress <span className='dot-animate'>...</span></span>)};
 
     return (
         <Box sx={{ 
