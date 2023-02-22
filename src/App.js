@@ -69,46 +69,48 @@ function App() {
       let video = videoRef.current;
       video.srcObject = stream;
 
+      setIntroLoading(false);
+
+      setTimeout(() => {
+        document.querySelector('#intro').style.zIndex = -1;
+      }, 500)
+
       video.onloadedmetadata = function(e) {
         video.width = w
         video.height = h
         // setStream(stream)
         video.play();
         document.querySelector('.record').style.display = "block";
-        setIntroLoading(false);
       }
-      
     })
     .catch((err) => {
-      alert('Unable to capture your camera. Please check console logs.');
+      alert('You have denied access to camera. Unable to capture your camera at the moment.');
       console.error(err);
+      window.location.href= "https://google.com"
     })
 
-    // const checkFp = JSON.parse(window.localStorage.getItem("fingerprint"));
-    // if (checkFp === null) {
-    //   setOpenSecureModal(true);
-    // }
-
-    let count = 3;
-    (function countStart() {
-      document.querySelector('#text').style.display = "block";
-        
-        setTimeout(countStart, 1025);
-        document.querySelector('#text').innerHTML = count;
-        count--
-
-        if (count <= -1) {
-          document.querySelector('#text').style.display = "none";
-          setTimeout(() => {
-            document.querySelector('#text').innerHTML = "";
-          }, 725)
+    setTimeout(() => {
+      let count = 3;
+      (function countStart() {
+        document.querySelector('#text').style.display = "block";
           
-        }
+          setTimeout(countStart, 1025);
+          document.querySelector('#text').innerHTML = count;
+          count--
 
-        if (count === -1) {
-          startRecording();
-        }
-    })();
+          if (count <= -1) {
+            document.querySelector('#text').style.display = "none";
+            setTimeout(() => {
+              document.querySelector('#text').innerHTML = "";
+            }, 725)
+            
+          }
+
+          if (count === -1) {
+            startRecording();
+          }
+      })();
+    }, 1000)
   }
 
   const handleCloseRecordingPreview = () => {
@@ -392,8 +394,10 @@ function App() {
 
       { screenSize <= 500 ? (
       <>
-      { introLoading ? 
-      <div className="fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center fade-in">
+
+      {/* { introLoading ?  */}
+
+      <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center ${!introLoading ? 'fade-out' : 'fade-in' }` }>
 
         <div className="fixed inset-x-0 top-16 z-50 mx-4 mb-4 rounded-lg bg-white p-4 md:relative md:mx-auto md:max-w-md">
           <p className="px-2 text-black text text-center font-semibold">Allow App to use your camera and microphone</p>
@@ -402,7 +406,9 @@ function App() {
 
         <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
         <p className="w-1/2 text-center text-white">Starting up camera <span className="dot-animate">...</span></p>
-      </div> : "" }
+      </div> 
+
+      {/* : "" } */}
 
       {!preview ? <Hint props={recording} style={{ display: 'block', }} /> : ""}
 
