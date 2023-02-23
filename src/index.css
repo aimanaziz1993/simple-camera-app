@@ -146,7 +146,7 @@ video#recording {
 
 #recordedTime {
   color: crimson;
-  font-size: xx-large;
+  font-size: 35px;
   font-weight: 900;
   animation: blinker 1.5s linear infinite;
 }
@@ -172,9 +172,14 @@ video#recording {
 
 #recordedBlobSize {
   color: crimson;
-  font-size: x-large;
+  font-size: 15px;
   font-weight: 500;
   /* animation: blinker 2.0s linear infinite; */
+}
+
+.logged {
+  font-size: 15px;
+  text-align: left;
 }
 
 @keyframes blinker {

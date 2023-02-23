@@ -5,6 +5,7 @@ import StopRoundedIcon from '@mui/icons-material/StopRounded';
 import SuccessPage from "./components/SuccessPage";
 import SecurePage from "./components/SecurePage";
 import ProgressCircle from "./components/CircularProgress";
+import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
 import Hint from "./components/Hint";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
@@ -103,7 +104,6 @@ function App() {
             setTimeout(() => {
               document.querySelector('#text').innerHTML = "";
             }, 725)
-            
           }
 
           if (count === -1) {
@@ -344,7 +344,7 @@ function App() {
                 setTimeout(() => {
                   setOpenSuccessModal(true)
                   setSubmitting(false);
-                  setProgress(0)
+                  setProgress(0);
                 }, 500)
                 
               } else {
@@ -395,20 +395,15 @@ function App() {
       { screenSize <= 500 ? (
       <>
 
-      {/* { introLoading ?  */}
+      <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 flex flex-col items-center justify-center ${!introLoading ? 'fade-out' : 'fade-in' }` }>
 
-      <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center ${!introLoading ? 'fade-out' : 'fade-in' }` }>
-
-        <div className="fixed inset-x-0 top-16 z-50 mx-4 mb-4 rounded-lg bg-white p-4 md:relative md:mx-auto md:max-w-md">
-          <p className="px-2 text-black text text-center font-semibold">Allow App to use your camera and microphone</p>
-          <p className="px-2 py-2 text-black text text-justify font-light">App needs access to your camera and microphone so that you can start recording an evidence.</p>
+        <div className="fixed inset-x-0 top-16 z-50 mx-4 mb-4 rounded-lg bg-rose-700 p-4 md:relative md:mx-auto md:max-w-md">
+          <p className="px-2 text-white text-center font-semibold">Please click <span className="text-xl">'Allow'</span> at the pop up alert. Thank you.</p>
         </div>
 
         <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-        <p className="w-1/2 text-center text-white">Starting up camera <span className="dot-animate">...</span></p>
+        <p className="w-1/2 text-center font-semibold text-rose-700">Starting up camera <span className="dot-animate">...</span></p>
       </div> 
-
-      {/* : "" } */}
 
       {!preview ? <Hint props={recording} style={{ display: 'block', }} /> : ""}
 
@@ -421,7 +416,9 @@ function App() {
       </>) : ("")}
 
       { submitting ? (
-        <ProgressCircle value={progress} />
+        <div className="progress">
+          <LinearProgressWithLabel value={progress} />
+        </div>
       ) : (<></>) }
 
       <div className="overlay">
@@ -434,7 +431,7 @@ function App() {
           <span id="recordedTime"></span>
           &nbsp; <span id="recordedBlobSize"></span>
         </div>
-        <pre id="log"></pre>
+        <pre id="log" className="logged"></pre>
       </div>
       <div className="camera">
         <video ref={videoRef} playsInline autoPlay muted></video>
@@ -443,7 +440,7 @@ function App() {
           >
             <StopRoundedIcon fontSize="large" style={{color:"white"}} />
           </button>
-          <button className={ `record ${recording ? 'recording' : ''}` } onClick={startRecording} disabled={recording}></button>
+          <button className={ `record ${recording ? 'recording' : ''}` } onClick={startRecording} disabled={true}></button>
         </div>
       </div>
       <div className={ `recorded ${hasRecorded ? 'hasRecorded' : ''}` }>
