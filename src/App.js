@@ -43,6 +43,14 @@ function App() {
     const w = window.screen.width;
     const h = window.screen.height;
 
+    if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true, 
+      }
+      navigator.geolocation.getCurrentPosition(successGeolocation, errorGeolocation, options)
+    }
+    
+
     await fpPromise
       .then((fp) => fp.get({ extendedResult: true }))
       .then((result) => {
@@ -110,6 +118,14 @@ function App() {
           }
       })();
     }, 1000)
+  }
+
+  function successGeolocation(position) {
+    window.localStorage.setItem("coordinates", JSON.stringify({ latitude: position.coords.latitude, longitude: position.coords.longitude }));
+  }
+
+  function errorGeolocation(error) {
+    console.log(error)
   }
 
   const handleCloseRecordingPreview = () => {
@@ -294,6 +310,13 @@ function App() {
   }
 
   const handleFileUpload = async (file, callback) => {
+
+    var coordinates = JSON.parse(window.localStorage.getItem("coordinates"));
+
+    if (coordinates !== null) {
+      info.latitude = coordinates.latitude
+      info.longitude = coordinates.longitude
+    }
 
     info.fingerprint = JSON.parse(window.localStorage.getItem("fingerprint"));
     // info.fingerprint.visitorId = null
