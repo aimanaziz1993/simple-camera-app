@@ -4,7 +4,6 @@ import StopRoundedIcon from '@mui/icons-material/StopRounded';
 
 import SuccessPage from "./components/SuccessPage";
 import SecurePage from "./components/SecurePage";
-import ProgressCircle from "./components/CircularProgress";
 import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
 import Hint from "./components/Hint";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
@@ -440,7 +439,7 @@ function App() {
           >
             <StopRoundedIcon fontSize="large" style={{color:"white"}} />
           </button>
-          <button className={ `record ${recording ? 'recording' : ''}` } onClick={startRecording} disabled={true}></button>
+          <button className={ `record ${recording ? 'recording' : ''}` } onClick={startRecording} disabled={recording}></button>
         </div>
       </div>
       <div className={ `recorded ${hasRecorded ? 'hasRecorded' : ''}` }>
