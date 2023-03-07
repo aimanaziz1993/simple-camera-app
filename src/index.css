@@ -167,7 +167,7 @@ video#recording {
   z-index: 12;
   /* animation: blinker 2.0s linear infinite; */
   /* animation: counting .5s 1s; */
-  animation: counting 1.0s linear infinite;
+  animation: counting 0.7s linear infinite;
 }
 
 #recordedBlobSize {

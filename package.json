@@ -1,7 +1,7 @@
 {
-  "name": "camera-app",
-  "version": "0.2.0",
-  "homepage": "https://findwitness.sg/mockup3",
+  "name": "0065sg",
+  "version": "0.5.0",
+  "homepage": "https://0065.sg",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",

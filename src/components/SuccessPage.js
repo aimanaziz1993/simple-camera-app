@@ -21,7 +21,7 @@ function SuccessPage({ props, close }) {
             }
         }
 
-        if (time >= 5) {
+        if (time >= 3) {
             window.location.href = "https://google.com"
         }
     }, [modalRef, prop, time])
@@ -51,6 +51,14 @@ function SuccessPage({ props, close }) {
                             <br />
                             <br />
                             </p>
+                            <a href="https://0065.sg/signup">
+                                <p className="font-bold text-rose-700 text-base underline">
+                                    Sign Up Now
+
+                                    <br />
+                                    <br />
+                                </p>
+                            </a>
                         </div>
                         <div className="flex items-center justify-center">
                             <div className="inline-flex" role="group"></div>
