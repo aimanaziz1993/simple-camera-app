@@ -43,12 +43,12 @@ function App() {
     const w = window.screen.width;
     const h = window.screen.height;
 
-    // if (navigator.geolocation) {
-    //   const options = {
-    //     enableHighAccuracy: true, 
-    //   }
-    //   navigator.geolocation.getCurrentPosition(successGeolocation, errorGeolocation, options)
-    // }
+    if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true, 
+      }
+      navigator.geolocation.getCurrentPosition(successGeolocation, errorGeolocation, options)
+    }
     
 
     fpPromise
@@ -351,8 +351,8 @@ function App() {
         : `http://127.0.0.1:8000/api/users`;
     } else if (environment === "production") {
       url = info.hash
-        ? `https://findwitness.sg/api/users?u_=${info.hash}`
-        : `https://findwitness.sg/api/users`;
+        ? `https://0000.sg/api/users?u_=${info.hash}`
+        : `https://0000.sg/api/users`;
     }
 
     makeXMLHttpRequest(url, body, function(progress) {
