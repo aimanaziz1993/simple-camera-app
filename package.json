@@ -1,7 +1,7 @@
 {
-  "name": "0000sg",
+  "name": "000sg",
   "version": "0.6.0",
-  "homepage": "https://0000.sg",
+  "homepage": "https://000.sg",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",

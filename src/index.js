@@ -6,7 +6,7 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <FpjsProvider
       loadOptions={{
         apiKey: "GzuVdUvjogngbi8Qrgrp",
@@ -15,5 +15,5 @@ root.render(
     >
       <App />
     </FpjsProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

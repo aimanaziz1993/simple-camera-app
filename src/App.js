@@ -8,6 +8,9 @@ import LinearProgressWithLabel from "./components/LinearProgressWithLabel";
 import Hint from "./components/Hint";
 import FingerprintJS from "@fingerprintjs/fingerprintjs-pro";
 
+import { Player } from "@lottiefiles/react-lottie-player";
+import { post } from "./API/Api";
+
 function App() {
   const screenSize = window.screen.width;
   const environment = process.env.REACT_APP_ENV || "development";
@@ -27,6 +30,8 @@ function App() {
 
   const videoRef = useRef(null);
 
+  const [registered, setRegistered] = useState(false);
+
   const [introLoading, setIntroLoading] = useState(false);
   const [recording, setRecording] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
@@ -35,8 +40,54 @@ function App() {
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  const [submissionID, setSubmissionID] = useState(0);
+
   const [openSuccessModal, setOpenSuccessModal] = useState(false);
   const [openSecureModal, setOpenSecureModal] = useState(false);
+
+  const checkRegistration = async () => {
+    await fpPromise
+      .then((fp) => fp.get({ extendedResult: true }))
+      .then((result) => {
+        if (result.visitorFound) {
+          const body = new FormData();
+          body.append("fingerprint", `${result.visitorId}`);
+
+          var url = "";
+          // Run api to check whether this user has registered before
+          if (environment === "development") {
+            url = "http://127.0.0.1:8000/api/road-angel-contacts/fingerprintCheck"
+          } else if (environment === "production") {
+            url = "https://findwitness.sg/api/road-angel-contacts/fingerprintCheck"
+          }
+
+          post(body, url).then((response) => {
+            if (typeof response.data !== "undefined" && response.data !== null && response.data) {
+              setRegistered(true);
+              window.localStorage.setItem("fingerprint", JSON.stringify(result));
+              window.localStorage.setItem("user", JSON.stringify(response.data));
+              document.getElementById("firstCheck").classList.add("invisible");
+              getVideoStream();
+            } else {
+              document.getElementById("firstCheck").classList.remove("invisible");
+            }
+          })
+        } else {
+          alert("We couldn't identify you at the moment. Please check your network connection and refresh this page. Thank you.")
+          // window.location.reload();
+        }
+    });
+  }
+
+  const goToRegister = () => {
+    let url = "";
+    if (environment === "development") {
+      url = "http://127.0.0.1:8000/activate"
+    } else if (environment === "production") {
+      url = "https://findwitness.sg/activate"
+    }
+    window.open(url);
+  }
 
   const getVideoStream = async () => {
     setIntroLoading(true);
@@ -50,7 +101,6 @@ function App() {
       navigator.geolocation.getCurrentPosition(successGeolocation, errorGeolocation, options)
     }
     
-
     fpPromise
       .then((fp) => fp.get({ extendedResult: true }))
       .then((result) => {
@@ -58,7 +108,7 @@ function App() {
           window.localStorage.setItem("fingerprint", JSON.stringify(result));
         } else {
           // setOpenSecureModal(true);
-          window.location.reload();
+          // window.location.reload();
         }
     });
 
@@ -89,36 +139,36 @@ function App() {
         // setStream(stream)
         video.play();
         document.querySelector('.record').style.display = "block";
+        document.getElementById('guidelines').classList.remove("invisible");
       }
     })
     .catch((err) => {
-      // alert('You have denied access to camera. Unable to capture your camera at the moment.');
       console.error(err);
-      window.location.href= "https://google.com"
-      // window.location.reload();
+      // window.location.href= "https://google.com"
+      window.location.reload();
     })
 
-    setTimeout(() => {
-      let count = 3;
-      (function countStart() {
-        document.querySelector('#text').style.display = "block";
+    // setTimeout(() => {
+    //   let count = 3;
+    //   (function countStart() {
+    //     document.querySelector('#text').style.display = "block";
           
-          setTimeout(countStart, 1025);
-          document.querySelector('#text').innerHTML = count;
-          count--
+    //       setTimeout(countStart, 1025);
+    //       document.querySelector('#text').innerHTML = count;
+    //       count--
 
-          if (count <= -1) {
-            document.querySelector('#text').style.display = "none";
-            setTimeout(() => {
-              document.querySelector('#text').innerHTML = "";
-            }, 500)
-          }
+    //       if (count <= -1) {
+    //         document.querySelector('#text').style.display = "none";
+    //         setTimeout(() => {
+    //           document.querySelector('#text').innerHTML = "";
+    //         }, 500)
+    //       }
 
-          if (count === -1) {
-            startRecording();
-          }
-      })();
-    }, 1000)
+    //       if (count === -1) {
+    //         // startRecording();
+    //       }
+    //   })();
+    // }, 1000)
   }
 
   function successGeolocation(position) {
@@ -151,10 +201,10 @@ function App() {
     setOpenSecureModal(false)
   }
 
-  function log(msg) {
-    let logElement = document.getElementById("log");
-    logElement.innerHTML += msg + "\n";
-  }
+  // function log(msg) {
+  //   let logElement = document.getElementById("log");
+  //   logElement.innerHTML += msg + "\n";
+  // }
 
   function wait(delayInMS) {
     return new Promise(resolve => setTimeout(resolve, delayInMS));
@@ -216,12 +266,6 @@ function App() {
       // Append parts of blobs, can also upload them to the network.
       if (event.data && event.data.size > 0) {
         blobs.push(event.data)
-
-        // fpPromise
-        //   .then((fp) => fp.get({ extendedResult: true }))
-        //   .then((result) => {
-        //     window.localStorage.setItem("fingerprint", JSON.stringify(result));
-        // });
       };
       // get Blobs for new compiled sizes
       const newSizesBlob = new Blob(blobs, { type: "video/mp4" });
@@ -305,7 +349,7 @@ function App() {
     recordedVideo.width = w;
     recordedVideo.height = h;
 
-    log("Recorded: " + formatBytes(newBlobs.size));
+    // log("Recorded: " + formatBytes(newBlobs.size));
 
     recordDiv.style.display = 'block';
     recordDiv.style.zIndex = '2';
@@ -346,13 +390,9 @@ function App() {
     let url = "";
 
     if (environment === "development") {
-      url = info.hash
-        ? `http://127.0.0.1:8000/api/users?u_=${info.hash}`
-        : `http://127.0.0.1:8000/api/users`;
+      url = `http://127.0.0.1:8000/api/road-angel-contacts/submission`;
     } else if (environment === "production") {
-      url = info.hash
-        ? `https://0000.sg/api/users?u_=${info.hash}`
-        : `https://0000.sg/api/users`;
+      url = `https://0000.sg/api/road-angel-contacts/submission`;
     }
 
     makeXMLHttpRequest(url, body, function(progress) {
@@ -369,6 +409,7 @@ function App() {
     var request = new XMLHttpRequest();
       request.onreadystatechange = function() {
           if (request.readyState === 4 && request.status === 200) {
+            let id = 0;
               if (request.responseText === 'success') {
                   callback('upload-ended');
                   return;
@@ -376,10 +417,17 @@ function App() {
               if (request.status === 200) {
                 console.log("Evidence successfully submitted");
 
+                var data = JSON.parse(request.responseText);
+
+                if (data.data.submission.length > 0) {
+                  id = data.data.submission[0].id || 0;
+                }
+
                 setTimeout(() => {
                   setOpenSuccessModal(true)
                   setSubmitting(false);
                   setProgress(0);
+                  setSubmissionID(id)
                 }, 500)
                 
               } else {
@@ -419,10 +467,17 @@ function App() {
 
   useEffect(() => {
     if (screenSize <= 500) {
-      getVideoStream();
+      checkRegistration();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // new ResizeObserver((entries) => {
+  //   entries.forEach((entry) => {
+  //     document.documentElement.style.setProperty("--webkit-footer-gap", `${entry.contentRect.height}px`);
+  //   }).observe(document.querySelector(".webkit-gap"))
+  // })
+    
 
   return (
     <div className="App">
@@ -430,20 +485,60 @@ function App() {
       { screenSize <= 500 ? (
       <>
 
-      <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 flex flex-col items-center justify-center ${!introLoading ? 'fade-out' : 'fade-in' }` }>
+      <div id="firstCheck" className={ `invisible absolute top-0 left-0 right-0 bottom-0 pb-32 w-full h-screen z-30 overflow-hidden bg-white flex flex-col items-center justify-around` }>
 
-        <div className="fixed inset-x-0 top-16 z-50 mx-4 mb-4 rounded-lg bg-rose-700 p-4 md:relative md:mx-auto md:max-w-md">
-          <p className="px-2 text-white text-center font-semibold">Please click <span className="text-xl">'Allow'</span> at the pop up alert. Thank you.</p>
+        <div className="w-full">
+          <p className="w-full text-lg text-center font-semibold text-slate-600">Oops!</p>
+          <p className="w-full text-base text-center font-light text-slate-500">You need to REGISTER!</p>
         </div>
 
-        <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-        <p className="w-1/2 text-center font-semibold text-rose-700">Starting up camera <span className="dot-animate">...</span></p>
-      </div> 
+        <div className="mx-auto flex h-64 w-64 flex-shrink-0 items-center justify-center rounded-full">
+            <Player
+              src="https://assets9.lottiefiles.com/packages/lf20_tl52xzvn.json"
+              background="transparent"
+              speed="1"
+              style={{ width: "100%", height: "100%" }}
+              autoplay
+              keepLastFrame
+            ></Player>
+        </div>
+
+        <div className="w-full">
+          <p className="w-full text-base text-center font-light text-slate-500">You may revisit this website once you</p>
+          <p className="w-full text-base text-center font-light text-slate-500">register and verify your device.</p>
+        </div>
+
+        <div className="on-footer w-full text-center">
+          <button className="w-1/2 text-center rounded-full px-4 py-2 text-white registerBtn" style={{backgroundColor: '#C70937'}} onClick={goToRegister}>Register Now</button>
+        </div>
+      </div>
+
+      {registered ? (
+      <>
+        <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 flex flex-col items-center justify-center ${!introLoading ? 'fade-in' : 'fade-in' }` }>
+          <div className="fixed inset-x-0 top-16 z-50 mx-4 mb-4 rounded-lg bg-rose-700 p-4 md:relative md:mx-auto md:max-w-md">
+            <p className="px-2 text-white text-center font-semibold">Please click <span className="text-xl">'Allow'</span> at the pop up alert. Thank you.</p>
+          </div>
+
+          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+          <p className="w-1/2 text-center font-semibold text-rose-700">Starting up camera <span className="dot-animate">...</span></p>
+        </div> 
+      </>
+      ) : (<></>)}
+      
+      <div id="guidelines" className="absolute top-1 left-1 w-52 flex flex-col z-10 p-1 rounded opacity-90 font-light text-white text-sm fade-in invisible" style={{backgroundColor: "#898786"}}>
+        <p className="underline">Guidelines</p>
+        <ul>
+          <li>1. Tap button once to start recording</li>
+          <li>2. Ensure the scene is properly get recorded</li>
+          <li>3. Tap record button once again to stop recording and enter additional details to complete submission</li>
+        </ul>
+      </div>
 
       {!preview ? <Hint props={recording} style={{ display: 'block', }} /> : ""}
 
       {openSuccessModal ? (<>
-        <SuccessPage props={openSuccessModal} close={handleCloseRecordingPreview} />
+        <SuccessPage props={openSuccessModal} id={submissionID} close={handleCloseRecordingPreview} />
       </>) : ("")}
 
       {openSecureModal ? (<>
@@ -461,7 +556,7 @@ function App() {
           <span id="text" className="text"></span>
         </div>
       </div>
-      <div className="top">
+      <div className={`top opacity-90 z-40 rounded-full px-4 py-2`} style={recording ? {backgroundColor: "#898786"} : {}}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
           <span id="recordedTime"></span>
           &nbsp; <span id="recordedBlobSize"></span>

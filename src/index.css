@@ -117,7 +117,7 @@ video#recording {
   position: fixed;
   color: #fff;
   top: 20px;
-  right: 20px;
+  right: 5px;
   z-index: 3;
 }
 
@@ -146,7 +146,7 @@ video#recording {
 
 #recordedTime {
   color: crimson;
-  font-size: 35px;
+  font-size: 18px;
   font-weight: 900;
   animation: blinker 1.5s linear infinite;
 }
@@ -172,7 +172,7 @@ video#recording {
 
 #recordedBlobSize {
   color: crimson;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 500;
   /* animation: blinker 2.0s linear infinite; */
 }

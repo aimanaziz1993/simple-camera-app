@@ -17,7 +17,7 @@ function Hint({ props }) {
             justifyContent: "center", 
             color: "#fff", 
             position: "fixed", 
-            top: "80%", 
+            bottom: "25%", 
             zIndex: "100" }}>
             <Typography variant="h6" sx={{ color: "crimson", fontWeight: "600" }}>
                 {state ? <CaptionTwo /> : <CaptionOne /> }

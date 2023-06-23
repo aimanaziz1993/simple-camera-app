@@ -2,20 +2,56 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Capture 30s video of accident scene and call FindWitness at 6816 2969 within 48 hours to claim your reward!" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon-16x16.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/fw-logo.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <title>FindWitness Evidence Submission Portal</title>
 
     <script>var mywebstats_site_ids = mywebstats_site_ids || []; mywebstats_site_ids.push(101324156);</script>
     <script async src="//hello.staticstuff.net/w/mywebstats.js"></script>
+
+    <style>
+      :root {
+        --webkit-footer-gap: 80px;
+      }
+
+      @supports (-webkit-touch-callout: none) {
+          .on-footer {
+              position: absolute;
+              bottom: 0;
+              transition: padding 226ms ease-out;
+              padding-bottom: calc(100vh - var(--webkit-footer-gap) + 2%);
+          }
+
+          .webkit-gap {
+              position: fixed;
+              top: 0;
+              bottom: 0;
+
+              display: block;
+              width: 100%;
+              height: 100%;
+              z-index: -1;
+          }
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="webkit-gap"></div>
     <div id="root"></div>
+    
+  <script>
+    new ResizeObserver((entries) => {
+        entries.forEach((entry) => {
+            //const windowFullHeight = parseFloat(window.outerHeight);
+            document.documentElement.style.setProperty("--webkit-footer-gap", `${entry.contentRect.height}px`);
+        });
+    }).observe(document.querySelector(".webkit-gap"));
+  </script>
   </body>
 </html>
