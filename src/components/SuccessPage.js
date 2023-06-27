@@ -79,8 +79,8 @@ function SuccessPage({ props, id, close }) {
             <div className="relative min-h-screen px-4 md:flex md:items-center md:justify-center">
 
                 <div className="absolute inset-0 z-10 h-full w-full bg-black opacity-25"></div>
-                <div className="fixed inset-x-0 bottom-0 z-50 mx-0.5 mb-0.5 rounded-lg bg-white md:relative md:mx-auto md:max-w-md" style={{ height: "20.5rem" }}>
-                    <div className="items-center md:flex">
+                <div className="fixed inset-x-0 bottom-0 z-50 mx-0.5 mb-0.5 rounded-lg bg-white md:relative md:mx-auto md:max-w-md" style={{ height: "22rem" }}>
+                    <div className="items-center md:flex mb-2">
                         <div className="text-center md:mt-0 md:ml-6 md:text-left">
                             <p className="font-bold text-gray-700 text-base pt-2">Evidence Submitted</p>
                             <p className="mt-4 text-sm text-gray-700">
@@ -90,7 +90,7 @@ function SuccessPage({ props, id, close }) {
                                 <br />
                             </p>
 
-                            <form id="victimForm">
+                            <form id="victimForm" className="mb-2">
                                 <div className="mb-4 font-semibold">
                                     Victim Name/ Next of Kin
                                 </div>
@@ -107,15 +107,11 @@ function SuccessPage({ props, id, close }) {
 
                             <button className="w-1/2 text-center rounded-full px-4 py-2 text-white" style={{backgroundColor: '#C70937'}} onClick={handleSubmit}>SUBMIT</button>
                         </div>
-                        <div className="flex items-center justify-center">
+                        {/* <div className="flex items-center justify-center">
                             <div className="inline-flex" role="group"></div>
-                        </div>
+                        </div> */}
                     </div>
-                    <div className="bg-rose-600 text-center">
-                        {/* <button onClick={handleSubmit} className="p-4 px-4 w-full py-3 text-base font-semibold text-white md:order-2 md:ml-2 md:inline-block md:w-auto md:py-2">
-                            SUBMIT
-                        </button> */}
-                    </div>
+                    {/* <div className="bg-rose-600 text-center"></div> */}
                 </div>
             </div>
         </main>

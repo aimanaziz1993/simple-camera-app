@@ -138,7 +138,7 @@ function App() {
         video.height = h
         // setStream(stream)
         video.play();
-        document.querySelector('.record').style.display = "block";
+        
         document.getElementById('guidelines').classList.remove("invisible");
       }
     })
@@ -148,27 +148,28 @@ function App() {
       window.location.reload();
     })
 
-    // setTimeout(() => {
-    //   let count = 3;
-    //   (function countStart() {
-    //     document.querySelector('#text').style.display = "block";
+    setTimeout(() => {
+      let count = 3;
+      (function countStart() {
+        document.querySelector('#text').style.display = "block";
           
-    //       setTimeout(countStart, 1025);
-    //       document.querySelector('#text').innerHTML = count;
-    //       count--
+          setTimeout(countStart, 1025);
+          document.querySelector('#text').innerHTML = count;
+          count--
 
-    //       if (count <= -1) {
-    //         document.querySelector('#text').style.display = "none";
-    //         setTimeout(() => {
-    //           document.querySelector('#text').innerHTML = "";
-    //         }, 500)
-    //       }
+          if (count <= -1) {
+            document.querySelector('#text').style.display = "none";
+            setTimeout(() => {
+              document.querySelector('#text').innerHTML = "";
+            }, 500)
+          }
 
-    //       if (count === -1) {
-    //         // startRecording();
-    //       }
-    //   })();
-    // }, 1000)
+          if (count === -1) {
+            document.querySelector('.record').style.display = "block";
+            startRecording();
+          }
+      })();
+    }, 1000)
   }
 
   function successGeolocation(position) {
@@ -392,7 +393,7 @@ function App() {
     if (environment === "development") {
       url = `http://127.0.0.1:8000/api/road-angel-contacts/submission`;
     } else if (environment === "production") {
-      url = `https://0000.sg/api/road-angel-contacts/submission`;
+      url = `https://findwitness.sg/api/road-angel-contacts/submission`;
     }
 
     makeXMLHttpRequest(url, body, function(progress) {
@@ -529,7 +530,7 @@ function App() {
       <div id="guidelines" className="absolute top-1 left-1 w-52 flex flex-col z-10 p-1 rounded opacity-90 font-light text-white text-sm fade-in invisible" style={{backgroundColor: "#898786"}}>
         <p className="underline">Guidelines</p>
         <ul>
-          <li>1. Tap button once to start recording</li>
+          <li>1. Recording will auto start in 3 seconds</li>
           <li>2. Ensure the scene is properly get recorded</li>
           <li>3. Tap record button once again to stop recording and enter additional details to complete submission</li>
         </ul>
