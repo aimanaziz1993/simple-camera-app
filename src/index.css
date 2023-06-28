@@ -6,7 +6,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  font-family: Montserrat, Barlow Condensed, sans-serif;
   overflow: hidden;
 }
 
@@ -15,6 +16,12 @@
   /* height: fit-content; */
   position: relative;
   background-color: #313131;
+}
+
+ul > li {
+  font-size: 11px;
+  line-height: 12px;
+  font-family: Barlow Condensed, sans-serif;
 }
 
 .camera {

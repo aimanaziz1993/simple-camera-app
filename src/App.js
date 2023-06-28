@@ -139,7 +139,7 @@ function App() {
         // setStream(stream)
         video.play();
         
-        document.getElementById('guidelines').classList.remove("invisible");
+        
       }
     })
     .catch((err) => {
@@ -147,29 +147,37 @@ function App() {
       // window.location.href= "https://google.com"
       window.location.reload();
     })
+  }
 
-    setTimeout(() => {
-      let count = 3;
-      (function countStart() {
-        document.querySelector('#text').style.display = "block";
+  const start = () => {
+    document.getElementById('guidelines').classList.remove("invisible");
+    document.getElementById('guidelineImg').classList.add("hidden");
+    document.getElementById('getStarted').classList.add("hidden");
+    document.querySelector('.record').style.display = "block";
+    startRecording();
+
+    // setTimeout(() => {
+    //   let count = 3;
+    //   (function countStart() {
+    //     document.querySelector('#text').style.display = "block";
           
-          setTimeout(countStart, 1025);
-          document.querySelector('#text').innerHTML = count;
-          count--
+    //       setTimeout(countStart, 1025);
+    //       document.querySelector('#text').innerHTML = count;
+    //       count--
 
-          if (count <= -1) {
-            document.querySelector('#text').style.display = "none";
-            setTimeout(() => {
-              document.querySelector('#text').innerHTML = "";
-            }, 500)
-          }
+    //       if (count <= -1) {
+    //         document.querySelector('#text').style.display = "none";
+    //         setTimeout(() => {
+    //           document.querySelector('#text').innerHTML = "";
+    //         }, 500)
+    //       }
 
-          if (count === -1) {
-            document.querySelector('.record').style.display = "block";
-            startRecording();
-          }
-      })();
-    }, 1000)
+    //       if (count === -1) {
+    //         document.querySelector('.record').style.display = "block";
+    //         startRecording();
+    //       }
+    //   })();
+    // }, 1000)
   }
 
   function successGeolocation(position) {
@@ -516,23 +524,29 @@ function App() {
 
       {registered ? (
       <>
-        <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 flex flex-col items-center justify-center ${!introLoading ? 'fade-in' : 'fade-in' }` }>
+        <div id="intro" className={ `fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-30 overflow-hidden bg-gray-700 flex flex-col items-center justify-center ${!introLoading ? 'fade-out' : ''}` }>
           <div className="fixed inset-x-0 top-16 z-50 mx-4 mb-4 rounded-lg bg-rose-700 p-4 md:relative md:mx-auto md:max-w-md">
             <p className="px-2 text-white text-center font-semibold">Please click <span className="text-xl">'Allow'</span> at the pop up alert. Thank you.</p>
           </div>
 
           <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
           <p className="w-1/2 text-center font-semibold text-rose-700">Starting up camera <span className="dot-animate">...</span></p>
-        </div> 
+        </div>
+
+        <img id="guidelineImg" className="relative z-20 w-full h-screen fade-in" src="/test/guideline_overlay.png" alt="guideline" /> 
+
+        <div id="getStarted" className="fixed bottom-0 w-full mb-4 text-center z-20 fade-in">
+          <button className="w-1/2 text-center rounded-full px-4 py-2 text-white" style={{backgroundColor: '#C70937'}} onClick={start}>Get Started</button>
+        </div>
       </>
       ) : (<></>)}
       
-      <div id="guidelines" className="absolute top-1 left-1 w-52 flex flex-col z-10 p-1 rounded opacity-90 font-light text-white text-sm fade-in invisible" style={{backgroundColor: "#898786"}}>
-        <p className="underline">Guidelines</p>
+      <div id="guidelines" className="absolute top-1 left-1 w-52 flex flex-col z-10 p-1 rounded opacity-90 font-light text-white text-sm invisible" style={{backgroundColor: "rgb(58, 57, 57, 0.5)"}}>
+        <p className="underline mb-1 font-bold" style={{ fontFamily: "Montserrat, Barlow Condensed, sans-serif", fontSize: "11px", lineHeight: "12px" }}>Guidelines</p>
         <ul>
-          <li>1. Recording will auto start in 3 seconds</li>
-          <li>2. Ensure the scene is properly get recorded</li>
-          <li>3. Tap record button once again to stop recording and enter additional details to complete submission</li>
+          <li className="mb-1">1. By aiming for a wide variety of shots and angles.</li>
+          <li className="mb-1">2. Take a slow camera pan across the accident scene.</li>
+          <li className="mb-1">3. Please cover the accident scene, location and details relevant to the accident.</li>
         </ul>
       </div>
 
@@ -557,7 +571,7 @@ function App() {
           <span id="text" className="text"></span>
         </div>
       </div>
-      <div className={`top opacity-90 z-40 rounded-full px-4 py-2`} style={recording ? {backgroundColor: "#898786"} : {}}>
+      <div className={`top opacity-90 z-40 rounded-full px-4 py-2`} style={recording ? {backgroundColor: "rgb(58, 57, 57, 0.5)"} : {}}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
           <span id="recordedTime"></span>
           &nbsp; <span id="recordedBlobSize"></span>
