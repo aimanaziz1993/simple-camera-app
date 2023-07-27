@@ -21,7 +21,7 @@ function App() {
     }
   }
 
-  const fpPromise = FingerprintJS.load({ apiKey: "GzuVdUvjogngbi8Qrgrp" });
+  const fpPromise = FingerprintJS.load({ apiKey: "erkdHb9lK0Q44C3rdkzL" });
 
   let info = {};
   let blobs = [];
